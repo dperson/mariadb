@@ -5,7 +5,7 @@ MAINTAINER David Personette <dperson@dperson.com>
 RUN export DEBIAN_FRONTEND='noninteractive' && \
     export VERSION='10.0' && \
     groupadd -r mysql && useradd -r -g mysql mysql && \
-    apt-key adv --keyserver pool.sks-keyservers.net --recv-keys \
+    apt-key adv --keyserver pgp.mit.edu --recv-keys \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$VERSION/debian " > \
                 /etc/apt/sources.list.d/mariadb.list && \
