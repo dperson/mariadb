@@ -88,12 +88,12 @@ else
         # TODO proper SQL escaping on ALL the things D:
 
         tempSqlFile='/tmp/mysql-first-time.sql'
-        cat > "$tempSqlFile" <<-SQL
-            DELETE FROM mysql.user;
-            CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-            GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
-            DROP DATABASE IF EXISTS test;
-        SQL
+        cat > "$tempSqlFile" <<-SQLINIT
+		DELETE FROM mysql.user;
+		CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+		GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
+		DROP DATABASE IF EXISTS test;
+		SQLINIT
 
         if [[ "$MYSQL_DATABASE" ]]; then
             echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\`;" \
