@@ -9,7 +9,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$VERSION/debian " > \
                 /etc/apt/sources.list.d/mariadb.list && \
-    echo "wheezy main" >> /etc/apt/sources.list.d/mariadb.list && \
+    echo "stable main" >> /etc/apt/sources.list.d/mariadb.list && \
     apt-get update -qq && \
     apt-get install -qqy --no-install-recommends mariadb-server \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
