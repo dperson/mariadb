@@ -21,6 +21,6 @@ COPY mariadb.sh /usr/bin/
 
 EXPOSE 3306
 
-VOLUME /var/lib/mysql
+VOLUME ["/var/lib/mysql"]
 
 ENTRYPOINT ["mariadb.sh"]
