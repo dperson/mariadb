@@ -61,7 +61,7 @@ shift $(( OPTIND - 1 ))
 
 chown -Rh mysql:mysql /var/lib/mysql
 
-if ps -ef | grep -q mysql; then
+if ps -ef | egrep -v grep | grep -q mysql; then
     echo "Service already running, please restart container to apply changes"
 elif [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
     exec "$@"
