@@ -61,13 +61,13 @@ shift $(( OPTIND - 1 ))
 
 chown -Rh mysql:mysql /var/lib/mysql
 
-if ps -ef | egrep -v grep | grep -q mysql; then
-    echo "Service already running, please restart container to apply changes"
-elif [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
+if [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
     exec "$@"
 elif [[ $# -ge 1 ]]; then
     echo "ERROR: command not found: $1"
     exit 13
+elif ps -ef | egrep -v grep | grep -q mysql; then
+    echo "Service already running, please restart container to apply changes"
 else
     # read DATADIR from the MySQL config
     DATADIR="$(mysqld --verbose --help 2>/dev/null |
