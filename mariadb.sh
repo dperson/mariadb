@@ -61,7 +61,7 @@ shift $(( OPTIND - 1 ))
 
 [[ "${TIMEZONE:-""}" ]] && timezone "$TIMEZONE"
 
-chown -Rh mysql:mysql /var/lib/mysql
+chown -Rh mysql. /var/lib/mysql
 
 if [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
     exec "$@"

@@ -9,18 +9,19 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$VERSION/debian " > \
                 /etc/apt/sources.list.d/mariadb.list && \
-    echo "wheezy main" >> /etc/apt/sources.list.d/mariadb.list && \
+    echo "jessie main" >> /etc/apt/sources.list.d/mariadb.list && \
     apt-get update -qq && \
     apt-get install -qqy --no-install-recommends mariadb-server \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
     sed -ri 's/^(bind-address|skip-networking)/;\1/' /etc/mysql/my.cnf && \
+    mkdir /var/lib/mysql && \
+    chown -Rh mysql. /var/lib/mysql && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql && \
-    mkdir /var/lib/mysql
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql
 COPY mariadb.sh /usr/bin/
 
 EXPOSE 3306
 
-VOLUME ["/var/lib/mysql"]
+VOLUME ["/etc/mysql", "/var/lib/mysql"]
 
 ENTRYPOINT ["mariadb.sh"]
