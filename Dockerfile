@@ -14,7 +14,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     apt-get install -qqy --no-install-recommends mariadb-server \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
     sed -ri 's/^(bind-address|skip-networking)/;\1/' /etc/mysql/my.cnf && \
-    mkdir /var/lib/mysql && \
+    mkdir -p /var/lib/mysql || : && \
     chown -Rh mysql. /var/lib/mysql && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql
