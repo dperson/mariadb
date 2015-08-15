@@ -1,4 +1,4 @@
-[![logo](https://upload.wikimedia.org/wikipedia/en/3/3e/MariaDB_Logo_from_SkySQL_Ab.png)](https://mariadb.org/)
+[![logo](https://raw.githubusercontent.com/dperson/mariadb/master/logo.png)](https://mariadb.org/)
 
 # MariaDB
 
