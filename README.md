@@ -40,19 +40,25 @@ ENVIROMENT VARIABLES (only available with `docker run`)
  * `MYSQL_DATABASE` - Will create DB when initializing container
  * `MYSQL_USER` - Will create user when initializing container
  * `MYSQL_PASSWORD` - Will be used in creating user above
- * `TIMEZONE` - As above, set a zoneinfo timezone, IE `EST5EDT`
+ * `TZ` - As above, set a zoneinfo timezone, IE `EST5EDT`
 
 ## Examples
 
 Any of the commands can be run at creation with `docker run` or later with
 `docker exec mariadb.sh` (as of version 1.3 of docker).
 
-    sudo docker run -p 3306:3306 -d dperson/mariadb -T EST5EDT
+### Setting the Timezone
+
+    sudo docker run -p 3306:3306 -d dperson/mariadb -t EST5EDT
+
+OR using `environment variables`
+
+    sudo docker run -p 3306:3306 -e TZ=EST5EDT -d dperson/mariadb
 
 Will get you the same settings as
 
     sudo docker run --name db -p 3306:3306 -d dperson/mariadb
-    sudo docker exec db mariadb.sh -T EST5EDT ls -AlF /etc/localtime
+    sudo docker exec db mariadb.sh -t EST5EDT ls -AlF /etc/localtime
     sudo docker restart db
 
 ## Complex configuration
