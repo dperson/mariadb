@@ -64,8 +64,11 @@ done
 shift $(( OPTIND - 1 ))
 
 [[ "${TZ:-""}" ]] && timezone "$TZ"
+[[ "${USERID:-""}" =~ ^[0-9]+$ ]] && usermod -u $USERID mysql
+[[ "${GROUPID:-""}" =~ ^[0-9]+$ ]] && usermod -g $GROUPID mysql
 
-chown -Rh mysql. /var/lib/mysql
+chown -Rh mysql. /run/mysqld /var/lib/mysql /var/log/mysql* 2>&1 |
+            grep -iv 'Read-only' || :
 
 if [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
     exec "$@"
