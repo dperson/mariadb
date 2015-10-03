@@ -40,7 +40,9 @@ ENVIROMENT VARIABLES (only available with `docker run`)
  * `MYSQL_DATABASE` - Will create DB when initializing container
  * `MYSQL_USER` - Will create user when initializing container
  * `MYSQL_PASSWORD` - Will be used in creating user above
- * `TZ` - As above, set a zoneinfo timezone, IE `EST5EDT`
+ * `TZ` - As above, configure the zoneinfo timezone, IE `EST5EDT`
+ * `USERID` - Set the UID for the DB user
+ * `GROUPID` - Set the GID for the DB user
 
 ## Examples
 
