@@ -17,7 +17,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     mkdir -p /var/lib/mysql || : && \
     chown -Rh mysql. /var/lib/mysql && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql/*
 COPY mariadb.sh /usr/bin/
 
 EXPOSE 3306
