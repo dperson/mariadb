@@ -13,7 +13,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     apt-get update -qq && \
     apt-get install -qqy --no-install-recommends mariadb-server \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
-    sed -ri 's/^(bind-address|skip-networking)/;\1/' /etc/mysql/my.cnf && \
+    sed -ri 's/^(bind-address|skip-networking)/#\1/' /etc/mysql/my.cnf && \
     sed -ri '/= utf8/s/^#//' /etc/mysql/conf.d/mariadb.cnf && \
     mkdir -p /var/lib/mysql || : && \
     chown -Rh mysql. /var/lib/mysql && \
