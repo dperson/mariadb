@@ -35,11 +35,11 @@ When started MariaDB container will listen on port 3306.
 
 ENVIROMENT VARIABLES (only available with `docker run`)
 
- * `MYSQL_ROOT_PASSWORD` - Will set root password when initializing container
- * `MYSQL_ALLOW_EMPTY_PASSWORD` - Allow empty passwords (bad idea)
- * `MYSQL_DATABASE` - Will create DB when initializing container
- * `MYSQL_USER` - Will create user when initializing container
- * `MYSQL_PASSWORD` - Will be used in creating user above
+ * `SQL_ROOT_PASSWORD` - Will set root password when initializing container
+ * `SQL_ALLOW_EMPTY_PASSWORD` - Allow empty passwords (bad idea)
+ * `DATABASE` - Will create DB when initializing container
+ * `SQL_USER` - Will create user when initializing container
+ * `SQL_PASSWORD` - Will be used in creating user above
  * `TZ` - As above, configure the zoneinfo timezone, IE `EST5EDT`
  * `USERID` - Set the UID for the DB user
  * `GROUPID` - Set the GID for the DB user

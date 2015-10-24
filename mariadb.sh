@@ -29,7 +29,7 @@ timezone() { local timezone="${1:-EST5EDT}"
     }
 
     if [[ $(cat /etc/timezone) != $timezone ]]; then
-        echo "$timezone" > /etc/timezone
+        echo "$timezone" >/etc/timezone
         ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
         dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1
     fi
@@ -83,48 +83,92 @@ else
                 awk '$1 == "datadir" {print $2; exit;}')"
 
     if [[ ! -d "$DATADIR/mysql" ]]; then
-        if [[ -z "$MYSQL_ROOT_PASSWORD" && -z "$MYSQL_ALLOW_EMPTY_PASSWORD" ]]
+        if [[ -z "$SQL_ROOT_PASSWORD" && -z "$SQL_ALLOW_EMPTY_PASSWORD" ]]
         then
-            echo >&2 'error: DB uninitialized and MYSQL_ROOT_PASSWORD not set'
-            echo >&2 '  Did you forget to add -e MYSQL_ROOT_PASSWORD=... ?'
+            echo >&2 'error: DB uninitialized and SQL_ROOT_PASSWORD not set'
+            echo >&2 '  Did you forget to add -e SQL_ROOT_PASSWORD=... ?'
             exit 1
         fi
 
-        echo 'Running mysql_install_db ...'
+        echo 'Initializing database'
         mysql_install_db --datadir="$DATADIR"
-        echo 'Finished mysql_install_db'
+        echo 'Database initialized'
 
-        # These statements _must_ be on individual lines, and _must_ end with
-        # semicolons (no line breaks or comments are permitted).
-        # TODO proper SQL escaping on ALL the things D:
+        mysqld --skip-networking &
+        pid="$!"
 
-        tempSqlFile='/tmp/mysql-first-time.sql'
-        cat > "$tempSqlFile" <<-SQLINIT
-		DELETE FROM mysql.user;
-		CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
-		GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
-		GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-		DROP DATABASE IF EXISTS test;
-		SQLINIT
+        mysql=( mysql --protocol=socket -uroot )
 
-        if [[ "$MYSQL_DATABASE" ]]; then
-            echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\`;" \
-                        >> "$tempSqlFile"
-        fi
-
-        if [[ "$MYSQL_USER" && "$MYSQL_PASSWORD" ]]; then
-            echo -n "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED " >>"$tempSqlFile"
-            echo "BY '$MYSQL_PASSWORD';" >> "$tempSqlFile"
-
-            if [[ "$MYSQL_DATABASE" ]]; then
-                echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%';"\
-                            >> "$tempSqlFile"
+        echo 'MySQL init process in progress...'
+        for i in {30..0}; do
+            if echo 'SELECT 1' | "${mysql[@]}" &>/dev/null; then
+                break
             fi
+            sleep 1
+        done
+        if [[ "$i" -eq 0 ]]; then
+            echo >&2 'MySQL init process failed.'
+            exit 1
         fi
 
-        echo 'FLUSH PRIVILEGES;' >> "$tempSqlFile"
+        if [[ -z "$SQL_INITDB_SKIP_TZINFO" ]]; then
+            # sed is for https://bugs.mysql.com/bug.php?id=20545
+            mysql_tzinfo_to_sql /usr/share/zoneinfo |
+                sed 's/Local time zone must be set--see zic manual page/FCTY/' |
+                "${mysql[@]}" mysql
+        fi
 
-        set -- "$@" --init-file="$tempSqlFile"
+        "${mysql[@]}" <<-EOSQL
+		-- What's done in this file shouldn't be replicated
+		--  or products like mysql-fabric won't work
+		SET @@SESSION.SQL_LOG_BIN=0;
+
+		DELETE FROM mysql.user;
+		CREATE USER 'root'@'%' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
+		GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
+		DROP DATABASE IF EXISTS test;
+		FLUSH PRIVILEGES;
+		EOSQL
+
+        if [[ "$SQL_ROOT_PASSWORD" ]]; then
+            mysql+=( -p"${SQL_ROOT_PASSWORD}" )
+        fi
+
+        if [[ "$DATABASE" ]]; then
+            echo "CREATE DATABASE IF NOT EXISTS '$DATABASE';" | "${mysql[@]}"
+            mysql+=( "$DATABASE" )
+        fi
+
+        if [[ "$SQL_USER" && "$SQL_PASSWORD" ]]; then
+            echo "CREATE USER '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD';" |
+                        "${mysql[@]}"
+
+            if [[ "$DATABASE" ]]; then
+                echo "GRANT ALL ON \`$DATABASE\`.* TO '$SQL_USER'@'%';" |
+                            "${mysql[@]}"
+            fi
+
+            echo 'FLUSH PRIVILEGES;' | "${mysql[@]}"
+        fi
+
+        echo
+        for f in /docker-entrypoint-initdb.d/*; do
+            case "$f" in
+                *.sh)  echo "$0: running $f"; . "$f" ;;
+                *.sql) echo "$0: running $f"; "${mysql[@]}" < "$f" && echo ;;
+                *)     echo "$0: ignoring $f" ;;
+            esac
+            echo
+        done
+
+        if ! kill -s TERM "$pid" || ! wait "$pid"; then
+            echo >&2 'MySQL init process failed.'
+            exit 1
+        fi
+
+        echo
+        echo 'MySQL init process done. Ready for start up.'
+        echo
     fi
     exec mysqld "$@"
 fi
