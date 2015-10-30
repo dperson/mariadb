@@ -65,7 +65,7 @@ shift $(( OPTIND - 1 ))
 
 [[ "${TZ:-""}" ]] && timezone "$TZ"
 [[ "${USERID:-""}" =~ ^[0-9]+$ ]] && usermod -u $USERID mysql
-[[ "${GROUPID:-""}" =~ ^[0-9]+$ ]] && usermod -g $GROUPID mysql
+[[ "${GROUPID:-""}" =~ ^[0-9]+$ ]] && groupmod -g $GROUPID mysql
 
 chown -Rh mysql. /run/mysqld /var/lib/mysql /var/log/mysql* 2>&1 |
             grep -iv 'Read-only' || :
