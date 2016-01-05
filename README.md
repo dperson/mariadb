@@ -33,7 +33,7 @@ When started MariaDB container will listen on port 3306.
 
     The 'command' (if provided and valid) will be run instead of mariadb
 
-ENVIROMENT VARIABLES (only available with `docker run`)
+ENVIRONMENT VARIABLES (only available with `docker run`)
 
  * `SQL_ROOT_PASSWORD` - Will set root password when initializing container
  * `SQL_ALLOW_EMPTY_PASSWORD` - Allow empty passwords (bad idea)
