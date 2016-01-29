@@ -19,7 +19,7 @@ When started MariaDB container will listen on port 3306.
 
 ## Hosting a MariaDB instance on port 3306
 
-    sudo docker run -p 3306:3306 -d dperson/mariadb
+    sudo docker run -it -p 3306:3306 -d dperson/mariadb
 
 ## Configuration
 
@@ -47,20 +47,20 @@ ENVIRONMENT VARIABLES (only available with `docker run`)
 ## Examples
 
 Any of the commands can be run at creation with `docker run` or later with
-`docker exec mariadb.sh` (as of version 1.3 of docker).
+`docker exec -it mariadb.sh` (as of version 1.3 of docker).
 
 ### Setting the Timezone
 
-    sudo docker run -p 3306:3306 -d dperson/mariadb -t EST5EDT
+    sudo docker run -it -p 3306:3306 -d dperson/mariadb -t EST5EDT
 
 OR using `environment variables`
 
-    sudo docker run -p 3306:3306 -e TZ=EST5EDT -d dperson/mariadb
+    sudo docker run -it -p 3306:3306 -e TZ=EST5EDT -d dperson/mariadb
 
 Will get you the same settings as
 
-    sudo docker run --name db -p 3306:3306 -d dperson/mariadb
-    sudo docker exec db mariadb.sh -t EST5EDT ls -AlF /etc/localtime
+    sudo docker run -it --name db -p 3306:3306 -d dperson/mariadb
+    sudo docker exec -it db mariadb.sh -t EST5EDT ls -AlF /etc/localtime
     sudo docker restart db
 
 ## Complex configuration
@@ -74,7 +74,7 @@ to copy it from a running container:
 
 You can use the modified configuration with:
 
-    sudo docker run --name db -p 3306:3306 -v /some/path:/etc/mysql:ro \
+    sudo docker run -it --name db -p 3306:3306 -v /some/path:/etc/mysql:ro \
                 -d dperson/mariadb
 
 # User Feedback
