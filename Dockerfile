@@ -25,7 +25,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     sed -i '/= utf8/s/^#//' /etc/mysql/conf.d/mariadb.cnf && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/lib/mysql && \
-    mkdir -p /var/lib/mysql || : && \
+    { mkdir -p /var/lib/mysql || :; } && \
     chown -Rh mysql. /var/lib/mysql
 #    sed -i '/max_binlog_size/a binlog_format           = MIXED' \
 #                /etc/mysql/my.cnf && \
