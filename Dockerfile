@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:stretch
 MAINTAINER David Personette <dperson@gmail.com>
 
 # Install mariadb
@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     /bin/echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
                 >/etc/apt/sources.list.d/mariadb.list && \
-    echo "jessie main" >>/etc/apt/sources.list.d/mariadb.list && \
+    echo "stretch main" >>/etc/apt/sources.list.d/mariadb.list && \
     /bin/echo -e 'Package: *\nPin: release o=MariaDB\nPin-Priority: 999' \
                 >/etc/apt/preferences.d/mariadb && \
     { echo mariadb-server-$MAJOR mysql-server/root_password password unused; \
