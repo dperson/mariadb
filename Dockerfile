@@ -8,8 +8,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     useradd -c 'MariaDB' -d /var/lib/mysql -g mysql -r mysql && \
     apt-get update -qq && \
     apt-get install -qqy --no-install-recommends gnupg1 && \
-    apt-key adv --keyserver pgp.mit.edu --recv-keys \
-                199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
+    apt-key adv --keyserver pgp.mit.edu --recv-keys F1656F24C74CD1D8 && \
     /bin/echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
                 >/etc/apt/sources.list.d/mariadb.list && \
     echo "sid main" >>/etc/apt/sources.list.d/mariadb.list && \
