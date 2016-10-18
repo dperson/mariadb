@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     apt-get install -qqy --no-install-recommends gnupg1 \
                 $(apt-get -s dist-upgrade|awk '/^Inst.*ecurity/ {print $2}') &&\
     apt-key adv --keyserver pgp.mit.edu --recv-keys F1656F24C74CD1D8 && \
-    echo "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
+    echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
                 >/etc/apt/sources.list.d/mariadb.list && \
     echo "sid main" >>/etc/apt/sources.list.d/mariadb.list && \
     echo 'Package: *\nPin: release o=MariaDB\nPin-Priority: 999' \
