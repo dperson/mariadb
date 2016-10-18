@@ -7,7 +7,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
     groupadd -r mysql && \
     useradd -c 'MariaDB' -d /var/lib/mysql -g mysql -r mysql && \
     apt-get update -qq && \
-    apt-get install -qqy --no-install-recommends gnupg2 && \
+    apt-get install -qqy --no-install-recommends gnupg1 && \
     apt-key adv --keyserver pgp.mit.edu --recv-keys \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     /bin/echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
