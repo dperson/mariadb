@@ -3,7 +3,7 @@ MAINTAINER David Personette <dperson@gmail.com>
 
 # Install mariadb
 RUN export DEBIAN_FRONTEND='noninteractive' && \
-    export MAJOR='10.0' && \
+    export MAJOR='10.2' && \
     groupadd -r mysql && \
     useradd -c 'MariaDB' -d /var/lib/mysql -g mysql -r mysql && \
     apt-get update -qq && \
@@ -12,7 +12,7 @@ RUN export DEBIAN_FRONTEND='noninteractive' && \
                 199369E5404BD5FC7D2FE43BCBCB082A1BB943DB && \
     /bin/echo -n "deb http://ftp.osuosl.org/pub/mariadb/repo/$MAJOR/debian " \
                 >/etc/apt/sources.list.d/mariadb.list && \
-    echo "stretch main" >>/etc/apt/sources.list.d/mariadb.list && \
+    echo "sid main" >>/etc/apt/sources.list.d/mariadb.list && \
     /bin/echo -e 'Package: *\nPin: release o=MariaDB\nPin-Priority: 999' \
                 >/etc/apt/preferences.d/mariadb && \
     { echo mariadb-server-$MAJOR mysql-server/root_password password unused; \
