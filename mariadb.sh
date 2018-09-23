@@ -68,6 +68,11 @@ shift $(( OPTIND - 1 ))
 chown -Rh mysql. /run/mysqld /var/lib/mysql /var/log/mysql* 2>&1 |
             grep -iv 'Read-only' || :
 
+export DB_DATA_PATH=${DB_DATA_PATH:-/var/lib/mysql}
+export DB_ROOT_PASS=${DB_ROOT_PASS:-unused}
+export DB_USER=${DB_USER:-mariadb_user}
+export DB_PASS=${DB_PASS:-mariadb_user_password}
+
 if [[ $# -ge 1 && -x $(which $1 2>&-) ]]; then
     exec "$@"
 elif [[ $# -ge 1 ]]; then
@@ -76,97 +81,19 @@ elif [[ $# -ge 1 ]]; then
 elif ps -ef | egrep -v grep | grep -q mysql; then
     echo "Service already running, please restart container to apply changes"
 else
-    # read DATADIR from the MySQL config
-    DATADIR="$(mysqld --verbose --help 2>/dev/null |
-                awk '$1 == "datadir" {print $2; exit;}')"
-
-    if [[ ! -d "$DATADIR/mysql" ]]; then
-        if [[ -z "$SQL_ROOT_PASSWORD" && -z "$SQL_ALLOW_EMPTY_PASSWORD" ]]
-        then
-            echo >&2 'error: DB uninitialized and SQL_ROOT_PASSWORD not set'
-            echo >&2 '  Did you forget to add -e SQL_ROOT_PASSWORD=... ?'
-            exit 1
-        fi
-
-        echo 'Initializing database'
-        mysql_install_db --datadir="$DATADIR"
-        echo 'Database initialized'
-
-        mysqld --skip-networking &
-        pid="$!"
-
-        mysql=( mysql --protocol=socket -uroot )
-
-        echo 'MySQL init process in progress...'
-        for i in {30..0}; do
-            if echo 'SELECT 1' | "${mysql[@]}" &>/dev/null; then
-                break
-            fi
-            sleep 1
-        done
-        if [[ "$i" -eq 0 ]]; then
-            echo >&2 'MySQL init process failed.'
-            exit 1
-        fi
-
-        if [[ -z "$SQL_INITDB_SKIP_TZINFO" ]]; then
-            # sed is for https://bugs.mysql.com/bug.php?id=20545
-            mysql_tzinfo_to_sql /usr/share/zoneinfo |
-                sed 's/Local time zone must be set--see zic manual page/FCTY/' |
-                "${mysql[@]}" mysql
-        fi
-
-        "${mysql[@]}" <<-EOSQL
-		-- What's done in this file shouldn't be replicated
-		--  or products like mysql-fabric won't work
-		SET @@SESSION.SQL_LOG_BIN=0;
-
-		DELETE FROM mysql.user;
-		CREATE USER 'root'@'%' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';
-		GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;
-		DROP DATABASE IF EXISTS test;
-		FLUSH PRIVILEGES;
-		EOSQL
-
-        if [[ "$SQL_ROOT_PASSWORD" ]]; then
-            mysql+=( -p"${SQL_ROOT_PASSWORD}" )
-        fi
-
-        if [[ "$DATABASE" ]]; then
-            echo "CREATE DATABASE IF NOT EXISTS '$DATABASE';" | "${mysql[@]}"
-            mysql+=( "$DATABASE" )
-        fi
-
-        if [[ "$SQL_USER" && "$SQL_PASSWORD" ]]; then
-            echo "CREATE USER '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD';" |
-                        "${mysql[@]}"
-
-            if [[ "$DATABASE" ]]; then
-                echo "GRANT ALL ON \`$DATABASE\`.* TO '$SQL_USER'@'%';" |
-                            "${mysql[@]}"
-            fi
-
-            echo 'FLUSH PRIVILEGES;' | "${mysql[@]}"
-        fi
-
-        echo
-        for f in /docker-entrypoint-initdb.d/*; do
-            case "$f" in
-                *.sh)  echo "$0: running $f"; . "$f" ;;
-                *.sql) echo "$0: running $f"; "${mysql[@]}" < "$f" && echo ;;
-                *)     echo "$0: ignoring $f" ;;
-            esac
-            echo
-        done
-
-        if ! kill -s TERM "$pid" || ! wait "$pid"; then
-            echo >&2 'MySQL init process failed.'
-            exit 1
-        fi
-
-        echo
-        echo 'MySQL init process done. Ready for start up.'
-        echo
+    if [[ ! -d "$DB_DATA_PATH/mysql" ]]; then
+        mysql_install_db --user=mysql --datadir=$DB_DATA_PATH
+        (cd /usr && mysqld_safe --datadir=$DB_DATA_PATH) &
+        echo -e '\ny\n$DB_ROOT_PASS\n$DB_ROOT_PASS\n\nn\n\n\n' | \
+                    mysql_secure_installation
+        echo "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD' WITH GRANT OPTION;" >/tmp/sql
+        echo "GRANT ALL ON *.* TO '$DB_USER'@'%';" >>/tmp/sql
+        echo "DELETE FROM mysql.user WHERE User='';" >>/tmp/sql
+        echo "DROP DATABASE test;" >> /tmp/sql
+        echo "FLUSH PRIVILEGES;" >> /tmp/sql
+        cat /tmp/sql | mysql -u root --password="${DB_ROOT_PASS}"
+        rm /tmp/sql
+        kill %1
     fi
-    exec mysqld "$@"
+    cd /usr; exec mysqld_safe --datadir=/var/lib/mysql "$@"
 fi
