@@ -5,8 +5,8 @@ MAINTAINER David Personette <dperson@gmail.com>
 RUN apk --no-cache --no-progress upgrade && \
     apk --no-cache --no-progress add bash mariadb mariadb-client tini shadow \
                 tzdata && \
-    sed -i '/skip-external-locking/a \skip-host-cache\nskip-name-resolve' \
-                /etc/mysql/my.cnf && \
+    sed -i '/symbolic-links/a \skip-external-locking\nskip-host-cache\nskip-name-resolve' \
+                /etc/my.cnf && \
     rm -rf /tmp/* $file moinmoin raw
 COPY mariadb.sh /usr/bin/
 
