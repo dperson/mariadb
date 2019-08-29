@@ -14,4 +14,4 @@ EXPOSE 3306
 
 VOLUME ["/etc/mysql", "/var/lib/mysql"]
 
-ENTRYPOINT ["mariadb.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/mariadb.sh"]
